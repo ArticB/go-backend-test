@@ -7,16 +7,16 @@ import (
 )
 
 type User struct {
-	id            primitive.ObjectID `bson:"_id"`
-	first_name    *string            `json:"first_name" min="2" max="100"`
-	last_name     *string            `json:"last_name" validate:"required" min="2" max="100"`
-	email         *string            `json:"email" validate:"email, required"`
-	password      *string            `json:"password" validate:"required" min="8"`
-	phone         *string            `json:"phone" validate:"required"`
-	user_type     *string            `json:"user_type" validate:"required" eq=ADMIN|eq=CREATOR|eq=USER`
-	token         *string            `json:"token" `
-	refresh_token *string            `json:"refresh_token"`
-	created_at    time.Time          `json:"created_at"`
-	updated_at    time.Time          `json:"updated_at"`
-	user_id       *string            `json:"user_id"`
+	ID           primitive.ObjectID `bson:"_id"`
+	FirtName     string             `json:"first_name"`
+	LastName     string             `json:"last_name"`
+	Email        string             `json:"email"`
+	Password     string             `json:"password"`
+	Phone        string             `json:"phone"`
+	UserType     string             `json:"user_type"`
+	Token        string             `json:"token" `
+	RefreshToken string             `json:"refresh_token"`
+	CreatedAt    time.Time          `json:"created_at"`
+	UpdatedAt    time.Time          `json:"updated_at"`
+	UserID       string             `json:"user_id"`
 }
