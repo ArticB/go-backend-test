@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	// "time"
@@ -14,6 +15,8 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+var API = "/api/v1"
 
 var users = []User{
 	{
@@ -47,6 +50,36 @@ func getUserByEmail(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, user)
 }
 
+func loginUser(c *gin.Context) {
+	email, hasEmail := c.GetQuery("email")
+	password, hasPass := c.GetQuery("password")
+	fmt.Printf("%t", hasEmail)
+	fmt.Printf("%t", hasPass)
+	if !hasEmail {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Missing email parameter"})
+		return
+	}
+
+	if !hasPass {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Missing password parameter"})
+		return
+	}
+
+	user, err := findUserByEmail(email)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Email not found"})
+		return
+	}
+
+	if user.Password != password {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Password did not match"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusFound, gin.H{"message": "Login successful"})
+}
+
 func createUser(c *gin.Context) {
 	var newUser User
 	if err := c.BindJSON(&newUser); err != nil {
@@ -71,6 +104,8 @@ func main() {
 	r.GET("/api/v1/users/:email", getUserByEmail)
 
 	r.POST("/api/v1/users", createUser)
+
+	r.GET("/api/v1/users/login", loginUser)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
