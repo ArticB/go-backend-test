@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"net/http"
+
 	// "time"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +13,6 @@ import (
 type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-
 }
 
 var users = []User{
@@ -21,13 +22,34 @@ var users = []User{
 	},
 }
 
+func findUserByEmail(email string) (*User, error) {
+	for i, u := range users {
+		if u.Email == email {
+			return &users[i], nil
+		}
+	}
+	return nil, errors.New("User not found")
+}
+
 func getUsers(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, users)
 }
 
+func getUserByEmail(c *gin.Context) {
+	email := c.Param("email")
+	user, err := findUserByEmail(email)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, user)
+}
+
 func createUser(c *gin.Context) {
 	var newUser User
-	if err := c.Bind(&newUser); err != nil {
+	if err := c.BindJSON(&newUser); err != nil {
 		return
 	}
 
@@ -45,6 +67,8 @@ func main() {
 		})
 	})
 	r.GET("/api/v1/users", getUsers)
+
+	r.GET("/api/v1/users/:email", getUserByEmail)
 
 	r.POST("/api/v1/users", createUser)
 
